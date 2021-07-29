@@ -10,6 +10,8 @@ router.get("/tasks/id=:id", auth.verifyAccess,tasks.findOne);
 
 router.post("/tasks/id=:id", auth.verifyAccess, tasks.update);
 
+router.post("/tasks/status/id=:id", auth.verifyAccess, tasks.updateStatus);
+
 router.delete("/tasks/id=:id", auth.verifyAccess, tasks.deleteOne);
 
 router.delete("/tasks/all", auth.verifyAccess, tasks.deleteAll);
