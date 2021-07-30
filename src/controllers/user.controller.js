@@ -13,7 +13,7 @@ exports.authentication = async (req, res) => {
         return res.json({ message: `user doesn't have permission` });
       if (!bcrypt.compareSync(req.body.password, user.password))
         return res.sendStatus(403);
-      jwt.sign({ user }, "aidanSecret", { expiresIn: "86400s" }, (err, token) => {
+      jwt.sign({ user }, "aidanSecret", (err, token) => {
         if (err) return res.send(err);
         res.json({ "access-token": `aidan|${token}` });
       });
