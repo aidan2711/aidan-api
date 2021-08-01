@@ -8,6 +8,8 @@ router.get("/tasks", auth.verifyAccess, tasks.findAll);
 
 router.get("/tasks/id=:id", auth.verifyAccess,tasks.findOne);
 
+router.get("/tasks/userId=:userId", auth.verifyAccess,tasks.findByUser);
+
 router.post("/tasks/id=:id", auth.verifyAccess, tasks.update);
 
 router.post("/tasks/status/id=:id", auth.verifyAccess, tasks.updateStatus);

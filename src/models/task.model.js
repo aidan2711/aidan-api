@@ -23,6 +23,13 @@ const TaskSchema = mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  created_by: {
+    type: String,
+    required: false,
+  },
+  // created_by: {
+  //   type: UserSchema,
+  // }
 });
 
 const Task = mongoose.model("Task", TaskSchema);

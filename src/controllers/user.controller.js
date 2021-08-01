@@ -1,4 +1,4 @@
-const User = require("@models/user.model");
+const { User } = require("@models/user.model");
 const { Role } = require("@models/role.model");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -55,65 +55,71 @@ exports.create = async (req, res) => {
   }
 };
 
-// exports.findAll = async (req, res) => {
-//   const username = req.query.username;
-//   var condition = username ? { username: `${username}` } : null;
+exports.findAll = async (req, res) => {
+  const username = req.query.username;
+  var condition = username ? { username: `${username}` } : null;
 
-//   const users = await User.findAll({
-//     where: condition,
-//     include: [{ model: Role, as: "role" }],
-//   }).catch((err) => HandlerUtils.errorHandler(res, err));
-//   return HandlerUtils.responseHandler(res, users);
-// };
+  const users = await User.find({ condition }).catch((err) =>
+    HandlerUtils.errorHandler(res, err)
+  );
+  return HandlerUtils.responseHandler(res, users);
+};
 
-// exports.findOne = async (req, res) => {
-//   const username = req.params.username;
-//   const user = await User.findOne({ where: { username: username } }).catch(
-//     (err) => HandlerUtils.errorHandler(res, err)
-//   );
-//   return HandlerUtils.responseHandler(res, user);
-// };
+exports.findOne = async (req, res) => {
+  const username = req.params.username;
+  const userId = req.params.userId;
+  const condition = null;
+  if (username) {
+    condition = { username: username };
+  } else if (userId) {
+    condition = { userId: userId };
+  }
+  const user = await User.findOne(condition).catch((err) =>
+    HandlerUtils.errorHandler(res, err)
+  );
+  return HandlerUtils.responseHandler(res, user);
+};
 
-// exports.update = async (req, res) => {
-//   const id = req.params.id;
-//   const isUpdated = await User.update(req.body, {
-//     where: { id: id },
-//   }).catch((err) => HandlerUtils.errorHandler(res, err));
-//   if (isUpdated == 1) {
-//     res.status(200).send({
-//       message: "updated data successfully!",
-//     });
-//   } else {
-//     res.status(500).send({
-//       message: `cannot delete data with id=${id}.`,
-//     });
-//   }
-// };
+exports.update = async (req, res) => {
+  const userId = req.params.userId;
+  User.findOne({ _id: userId }).then((data) => {
+    if (!data) return res.status(500).json({ message: `user's not exist` });
+    data.username =
+      req.body.username !== undefined ? req.body.username : data.username;
+    data.fullname =
+      req.body.fullname !== undefined ? req.body.fullname : data.fullname;
+    data.email = req.body.email !== undefined ? req.body.email : data.email;
+    if (req.body.password !== undefined) {
+      bcrypt.genSalt(10, async (err, salt) => {
+        bcrypt.hash(password, salt, async (err, hash) => {
+          data.password = hash;
+        });
+      });
+    }
+    data.save((err, data) => {
+      if (err)
+        return res.status(500).send(err).json({ message: "something wrong" });
+      return res.status(200).json({ message: "task updated", data: data });
+    });
+  });
+};
 
-// exports.delete = async (req, res) => {
-//   const id = req.params.id;
+exports.delete = async (req, res) => {
+  const id = req.params.id;
 
-//   const isDeleted = await User.destroy({
-//     where: { id: id },
-//   }).catch((err) => HandlerUtils.errorHandler(res, err));
-//   if (isDeleted == 1) {
-//     res.status(200).send({
-//       message: "delete data successfully!",
-//     });
-//   } else {
-//     res.status(500).send({
-//       message: `cannot delete data with id=${id}.`,
-//     });
-//   }
-// };
-
-// exports.deleteAll = async (req, res) => {
-//   const userCount = await User.destroy({
-//     where: {},
-//     truncate: false,
-//   }).catch((err) => HandlerUtils.errorHandler(res, err));
-//   return res.status(200).send({ message: `${userCount} data rows deleted` });
-// };
+  const isDeleted = await User.destroy({
+    where: { id: id },
+  }).catch((err) => HandlerUtils.errorHandler(res, err));
+  if (isDeleted == 1) {
+    res.status(200).send({
+      message: "delete data successfully!",
+    });
+  } else {
+    res.status(500).send({
+      message: `cannot delete data with id=${id}.`,
+    });
+  }
+};
 
 // exports.findAllActive = async (req, res) => {
 //   const users = await User.findAll({ where: { activated: true } }).catch(

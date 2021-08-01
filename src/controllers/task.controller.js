@@ -13,14 +13,20 @@ exports.create = async (req, res) => {
     return res.status(400).send({
       message: "fields can not empty",
     });
-  const task = await Task.create(req.body).catch((err) =>
+  Task.create(req.body)
+    .then((response) => HandlerUtils.responseHandler(res, response))
+    .catch((err) => HandlerUtils.errorHandler(res, err));
+};
+
+exports.findOne = async (req, res) => {
+  const task = await Task.findOne({ _id: req.params.id }).catch((err) =>
     HandlerUtils.errorHandler(res, err)
   );
   return HandlerUtils.responseHandler(res, task);
 };
 
-exports.findOne = async (req, res) => {
-  const task = await Task.findOne({ _id: req.params.id }).catch((err) =>
+exports.findByUser = async (req, res) => {
+  const task = await Task.find({ created_by: req.params.userId }).catch((err) =>
     HandlerUtils.errorHandler(res, err)
   );
   return HandlerUtils.responseHandler(res, task);
@@ -42,6 +48,7 @@ exports.deleteAll = async (req, res) => {
 
 exports.update = async (req, res) => {
   Task.findOne({ _id: req.params.id }).then((data) => {
+    console.log(data);
     if (!data) return res.status(500).json({ message: `task's not exist` });
     data.task = req.body.task !== undefined ? req.body.task : data.task;
     data.note = req.body.note !== undefined ? req.body.note : data.note;
